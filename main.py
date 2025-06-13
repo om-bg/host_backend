@@ -11,7 +11,7 @@ hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
 # Flux vidéo (ex: ngrok ESP32-CAM)
-stream_url = "https://f7ff-105-69-217-81.ngrok-free.app/video"
+stream_url = "https://9a0f-105-69-217-81.ngrok-free.app/video"
 cap = cv2.VideoCapture(stream_url)
 
 def detect_people(frame):
