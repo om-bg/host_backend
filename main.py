@@ -22,6 +22,10 @@ def detect_people(frame):
         cv2.putText(frame, "Person", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, (0, 255, 0), 2)
     return frame
+@app.get("/")
+async def root():
+    return {"message": "Host OK"}
+
 
 @app.get("/video_feed")
 async def video_feed():
