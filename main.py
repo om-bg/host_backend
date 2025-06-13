@@ -43,14 +43,9 @@ async def video_feed():
             if not ret:
                 continue
 
-            # Respect strict du format MJPEG
             yield (
                 f"--{boundary}\r\n"
-                "Content-Type: image/jpeg\r\n"
-                f"Content-Length: {len(buffer)}\r\n\r\n"
+                "Content-Type: image/jpeg\r\n\r\n"
             ).encode() + buffer.tobytes() + b"\r\n"
 
-    headers = {
-        "Content-Type": f"multipart/x-mixed-replace; boundary={boundary}"
-    }
-    return StreamingResponse(generate(), headers=headers)
+    return StreamingResponse(generate(), media_type=f"multipart/x-mixed-replace; boundary={boundary}")
