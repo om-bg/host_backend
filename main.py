@@ -51,48 +51,60 @@
 #     return StreamingResponse(generate(), media_type=f"multipart/x-mixed-replace; boundary={boundary}")
 
 
+# from fastapi import FastAPI, WebSocket
+# from fastapi.responses import StreamingResponse
+# import cv2
+# import numpy as np
+# import asyncio
+
+# app = FastAPI()
+# latest_frame = None
+# @app.get("/")
+# async def root():
+#     return {"message": "Host OK"}
+# @app.websocket("/ws")
+# async def websocket_endpoint(websocket: WebSocket):
+#     global latest_frame
+#     await websocket.accept()
+#     print("WebSocket accepted")  # 🔍 Voir si la connexion s'établit
+#     while True:
+#         try:
+#             data = await websocket.receive_bytes()
+#             np_arr = np.frombuffer(data, np.uint8)
+#             frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+#             latest_frame = frame
+#         except Exception as e:
+#             print(f"Erreur WebSocket: {e}")
+
+# @app.get("/video_feed")
+# async def video_feed():
+#     boundary = "frame"
+
+#     async def generate():
+#         global latest_frame
+#         while True:
+#             await asyncio.sleep(0.05)
+#             if latest_frame is None:
+#                 continue
+#             _, jpeg = cv2.imencode(".jpg", latest_frame)
+#             yield (
+#                 f"--{boundary}\r\n"
+#                 "Content-Type: image/jpeg\r\n"
+#                 f"Content-Length: {len(jpeg)}\r\n\r\n"
+#             ).encode() + jpeg.tobytes() + b"\r\n"
+
+#     headers = {"Content-Type": f"multipart/x-mixed-replace; boundary={boundary}"}
+#     return StreamingResponse(generate(), headers=headers)
+
 from fastapi import FastAPI, WebSocket
-from fastapi.responses import StreamingResponse
-import cv2
-import numpy as np
-import asyncio
 
 app = FastAPI()
-latest_frame = None
-@app.get("/")
-async def root():
-    return {"message": "Host OK"}
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    global latest_frame
     await websocket.accept()
-    print("WebSocket accepted")  # 🔍 Voir si la connexion s'établit
+    await websocket.send_text("Connexion WebSocket OK")
     while True:
-        try:
-            data = await websocket.receive_bytes()
-            np_arr = np.frombuffer(data, np.uint8)
-            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-            latest_frame = frame
-        except Exception as e:
-            print(f"Erreur WebSocket: {e}")
-
-@app.get("/video_feed")
-async def video_feed():
-    boundary = "frame"
-
-    async def generate():
-        global latest_frame
-        while True:
-            await asyncio.sleep(0.05)
-            if latest_frame is None:
-                continue
-            _, jpeg = cv2.imencode(".jpg", latest_frame)
-            yield (
-                f"--{boundary}\r\n"
-                "Content-Type: image/jpeg\r\n"
-                f"Content-Length: {len(jpeg)}\r\n\r\n"
-            ).encode() + jpeg.tobytes() + b"\r\n"
-
-    headers = {"Content-Type": f"multipart/x-mixed-replace; boundary={boundary}"}
-    return StreamingResponse(generate(), headers=headers)
+        data = await websocket.receive_text()
+        await websocket.send_text(f"Echo: {data}")
 
