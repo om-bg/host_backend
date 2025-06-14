@@ -66,11 +66,15 @@ async def root():
 async def websocket_endpoint(websocket: WebSocket):
     global latest_frame
     await websocket.accept()
+    print("WebSocket accepted")  # 🔍 Voir si la connexion s'établit
     while True:
-        data = await websocket.receive_bytes()
-        np_arr = np.frombuffer(data, np.uint8)
-        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        latest_frame = frame
+        try:
+            data = await websocket.receive_bytes()
+            np_arr = np.frombuffer(data, np.uint8)
+            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            latest_frame = frame
+        except Exception as e:
+            print(f"Erreur WebSocket: {e}")
 
 @app.get("/video_feed")
 async def video_feed():
